@@ -2,33 +2,72 @@ import React, { useState } from 'react';
 
 function Dashboard() {
   const [devices, setDevices] = useState([
-    { id: 1, name: 'Living Room Light', type: 'light', status: 'on', room: 'Living Room' },
-    { id: 2, name: 'Bedroom AC', type: 'ac', status: 'off', room: 'Bedroom', temperature: 22 },
-    { id: 3, name: 'Kitchen Fan', type: 'fan', status: 'on', room: 'Kitchen', speed: 2 },
+    { id: 1, name: 'Living Room Light', type: 'light', status: 'on', room: 'Living Room', brightness: 75 },
+    { id: 2, name: 'Bedroom Light', type: 'light', status: 'off', room: 'Bedroom', brightness: 60 },
     { id: 4, name: 'Front Door Lock', type: 'lock', status: 'locked', room: 'Entrance' },
+    { id: 6, name: 'Bedroom Fire Alarm', type: 'fire-alarm', status: 'normal', room: 'Bedroom', batteryLevel: 92 },
+    { id: 7, name: 'Living Room Fire Alarm', type: 'fire-alarm', status: 'normal', room: 'Living Room', batteryLevel: 78 },
+    { id: 8, name: 'Study Light', type: 'light', status: 'on', room: 'Study', brightness: 90 },
+    { id: 9, name: 'Living Room Fan', type: 'fan', status: 'on', room: 'Living Room', speed: 2 },
   ]);
 
   const toggleDevice = (id) => {
     setDevices(devices.map(device => {
       if (device.id === id) {
-        if (device.type === 'light' || device.type === 'fan') {
+        if (device.type === 'light') {
           return { ...device, status: device.status === 'on' ? 'off' : 'on' };
-        } else if (device.type === 'ac') {
+        } else if (device.type === 'fan') {
           return { ...device, status: device.status === 'on' ? 'off' : 'on' };
         } else if (device.type === 'lock') {
           return { ...device, status: device.status === 'locked' ? 'unlocked' : 'locked' };
+        } else if (device.type === 'fire-alarm') {
+          // Simulate testing the fire alarm or resetting an alarm
+          const statuses = ['normal', 'testing', 'low-battery'];
+          const currentIndex = statuses.indexOf(device.status);
+          const nextStatus = statuses[(currentIndex + 1) % statuses.length];
+          return { ...device, status: nextStatus };
         }
       }
       return device;
     }));
   };
 
-  const getDeviceIcon = (type, status) => {
+  const adjustBrightness = (id, brightness) => {
+    setDevices(devices.map(device => {
+      if (device.id === id && device.type === 'light') {
+        return { ...device, brightness: brightness, status: brightness > 0 ? 'on' : 'off' };
+      }
+      return device;
+    }));
+  };
+
+  const adjustFanSpeed = (id, speed) => {
+    setDevices(devices.map(device => {
+      if (device.id === id && device.type === 'fan') {
+        return { ...device, speed: speed, status: speed > 0 ? 'on' : 'off' };
+      }
+      return device;
+    }));
+  };
+
+  const getDeviceIcon = (type, status, device = null) => {
     switch (type) {
-      case 'light': return status === 'on' ? '💡' : '🔅';
-      case 'ac': return status === 'on' ? '❄️' : '🌡️';
+      case 'light': 
+        if (status === 'off') return '🔅';
+        if (device && device.brightness) {
+          if (device.brightness > 80) return '💡';
+          if (device.brightness > 50) return '�';
+          if (device.brightness > 20) return '💡';
+          return '🔅';
+        }
+        return status === 'on' ? '💡' : '🔅';
       case 'fan': return status === 'on' ? '💨' : '🔄';
       case 'lock': return status === 'locked' ? '🔒' : '🔓';
+      case 'fire-alarm': 
+        if (status === 'alarm') return '🚨';
+        if (status === 'testing') return '🔧';
+        if (status === 'low-battery') return '🔋';
+        return '🛡️'; // normal status
       default: return '📱';
     }
   };
@@ -39,133 +78,276 @@ function Dashboard() {
       case 'off': return 'bg-gray-50 text-gray-700 border-gray-200';
       case 'locked': return 'bg-red-50 text-red-700 border-red-200';
       case 'unlocked': return 'bg-yellow-50 text-yellow-700 border-yellow-200';
+      case 'normal': return 'bg-green-50 text-green-700 border-green-200';
+      case 'alarm': return 'bg-red-50 text-red-700 border-red-200 animate-pulse';
+      case 'testing': return 'bg-blue-50 text-blue-700 border-blue-200';
+      case 'low-battery': return 'bg-orange-50 text-orange-700 border-orange-200';
       default: return 'bg-gray-50 text-gray-700 border-gray-200';
     }
   };
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900 relative overflow-hidden">
-      {/* Animated Background Elements */}
+      {/* Enhanced Animated Background Elements */}
       <div className="absolute inset-0 overflow-hidden">
-        <div className="absolute -inset-10 opacity-50">
+        <div className="absolute -inset-10 opacity-40">
           <div className="absolute top-1/4 left-1/4 w-96 h-96 bg-purple-500 rounded-full mix-blend-multiply filter blur-xl opacity-70 animate-blob"></div>
           <div className="absolute top-1/3 right-1/4 w-96 h-96 bg-yellow-500 rounded-full mix-blend-multiply filter blur-xl opacity-70 animate-blob animation-delay-2000"></div>
           <div className="absolute bottom-1/4 left-1/3 w-96 h-96 bg-pink-500 rounded-full mix-blend-multiply filter blur-xl opacity-70 animate-blob animation-delay-4000"></div>
+          <div className="absolute top-1/2 right-1/3 w-72 h-72 bg-blue-500 rounded-full mix-blend-multiply filter blur-xl opacity-60 animate-blob animation-delay-6000"></div>
         </div>
       </div>
       
-      {/* Grid Pattern Overlay */}
-      <div className="absolute inset-0 bg-grid-pattern opacity-10"></div>
+      {/* Enhanced Grid Pattern Overlay */}
+      <div className="absolute inset-0 bg-grid-pattern opacity-20"></div>
       
-      <div className="relative z-10 max-w-7xl mx-auto px-4 py-8">
-      {/* Header Section with Gradient */}
-      <div className="mb-12">
-        <div className="bg-gradient-to-r from-blue-600 to-purple-600 rounded-2xl p-8 text-white shadow-xl">
-          <h2 className="text-3xl font-bold mb-3">Device Dashboard</h2>
-          <p className="text-blue-100 text-lg">Control your smart home devices with style</p>
-          <div className="mt-6 flex items-center space-x-6">
-            <div className="flex items-center space-x-2">
-              <div className="w-3 h-3 bg-green-400 rounded-full animate-pulse"></div>
-              <span className="text-sm">All systems online</span>
+      {/* Floating particles effect */}
+      <div className="absolute inset-0 overflow-hidden pointer-events-none">
+        <div className="absolute top-20 left-10 w-2 h-2 bg-white rounded-full opacity-60 animate-float"></div>
+        <div className="absolute top-40 right-20 w-1 h-1 bg-purple-300 rounded-full opacity-80 animate-float-delayed"></div>
+        <div className="absolute bottom-32 left-1/4 w-1.5 h-1.5 bg-yellow-300 rounded-full opacity-70 animate-float"></div>
+        <div className="absolute top-60 right-1/3 w-1 h-1 bg-pink-300 rounded-full opacity-60 animate-float-delayed"></div>
+      </div>
+      
+      <div className="relative z-10 max-w-7xl mx-auto px-6 py-12">
+      {/* Enhanced Header Section with Gradient */}
+      <div className="mb-16">
+        <div className="bg-gradient-to-r from-indigo-600 via-purple-600 to-pink-600 rounded-3xl p-10 text-white shadow-2xl border border-white/10 backdrop-blur-sm">
+          <div className="flex items-center justify-between mb-6">
+            <div>
+              <h2 className="text-4xl font-bold mb-4 bg-gradient-to-r from-white to-purple-100 bg-clip-text text-transparent">
+                Smart Home Dashboard
+              </h2>
+              <p className="text-purple-100 text-xl font-medium">Control your connected devices with elegance</p>
             </div>
-            <div className="text-sm opacity-75">
-              Last updated: {new Date().toLocaleTimeString()}
+            <div className="hidden md:flex items-center space-x-4">
+              <div className="bg-white/20 backdrop-blur-sm rounded-full p-4">
+                <div className="text-3xl">🏠</div>
+              </div>
+            </div>
+          </div>
+          <div className="flex flex-wrap items-center gap-6">
+            <div className="flex items-center space-x-3 bg-white/10 backdrop-blur-sm rounded-full px-4 py-2">
+              <div className="w-3 h-3 bg-emerald-400 rounded-full animate-pulse shadow-lg shadow-emerald-400/50"></div>
+              <span className="text-sm font-medium">All systems operational</span>
+            </div>
+            <div className="flex items-center space-x-3 bg-white/10 backdrop-blur-sm rounded-full px-4 py-2">
+              <div className="text-sm opacity-90">
+                🕐 Last updated: {new Date().toLocaleTimeString()}
+              </div>
+            </div>
+            <div className="flex items-center space-x-3 bg-white/10 backdrop-blur-sm rounded-full px-4 py-2">
+              <span className="text-sm font-medium">
+                🌡️ {Math.floor(Math.random() * 5) + 20}°C
+              </span>
             </div>
           </div>
         </div>
       </div>
 
-      {/* Device Cards Grid */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8">
+      {/* Enhanced Device Cards Grid */}
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8 mb-20">
         {devices.map((device) => (
           <div
             key={device.id}
-            className="group bg-white rounded-2xl shadow-lg p-6 hover:shadow-2xl transform hover:scale-105 transition-all duration-300 border border-gray-100 hover:border-blue-200"
+            className="group bg-white/90 backdrop-blur-sm rounded-3xl shadow-2xl p-8 hover:shadow-3xl transform hover:scale-105 transition-all duration-500 border border-white/20 hover:border-purple-200/50 relative overflow-hidden"
           >
+            {/* Card glow effect */}
+            <div className="absolute inset-0 bg-gradient-to-br from-purple-500/5 to-pink-500/5 opacity-0 group-hover:opacity-100 transition-opacity duration-500 rounded-3xl"></div>
+            
             {/* Device Header */}
-            <div className="flex items-center justify-between mb-6">
-              <div className="flex items-center space-x-3">
-                <div className="text-4xl group-hover:scale-110 transition-transform duration-200">
-                  {getDeviceIcon(device.type, device.status)}
+            <div className="relative z-10 flex items-center justify-between mb-8">
+              <div className="flex items-center space-x-4">
+                <div className="relative">
+                  <div className="text-5xl group-hover:scale-110 transition-transform duration-300 filter drop-shadow-lg">
+                    {getDeviceIcon(device.type, device.status, device)}
+                  </div>
+                  {(device.status === 'on' || device.status === 'locked' || device.status === 'normal') && (
+                    <div className="absolute -top-1 -right-1 w-4 h-4 bg-gradient-to-r from-emerald-400 to-emerald-500 rounded-full animate-pulse shadow-lg shadow-emerald-400/50"></div>
+                  )}
                 </div>
                 <div className="flex flex-col">
-                  <span className="text-xs text-gray-500 uppercase tracking-wide font-medium">
-                    {device.type}
+                  <span className="text-xs text-gray-500 uppercase tracking-wider font-bold">
+                    {device.type.replace('-', ' ')}
                   </span>
                 </div>
               </div>
               <div className="relative">
                 <span
-                  className={`px-3 py-1 rounded-full text-xs font-semibold shadow-sm ${getStatusColor(device.status)} border`}
+                  className={`px-4 py-2 rounded-full text-xs font-bold shadow-lg transition-all duration-300 ${getStatusColor(device.status)} border backdrop-blur-sm`}
                 >
                   {device.status}
                 </span>
-                {(device.status === 'on' || device.status === 'locked') && (
-                  <div className="absolute -top-1 -right-1 w-3 h-3 bg-green-400 rounded-full animate-ping"></div>
-                )}
               </div>
             </div>
 
-            {/* Device Info */}
-            <div className="mb-6">
-              <h3 className="text-xl font-bold text-gray-900 mb-3 group-hover:text-blue-600 transition-colors">
+            {/* Enhanced Device Info */}
+            <div className="relative z-10 mb-8">
+              <h3 className="text-xl font-bold text-gray-900 mb-4 group-hover:text-purple-600 transition-colors duration-300">
                 {device.name}
               </h3>
 
-              <div className="space-y-2">
-                <div className="flex items-center text-gray-600 text-sm">
-                  <span className="mr-2">📍</span>
-                  <span className="font-medium">{device.room}</span>
+              <div className="space-y-3">
+                <div className="flex items-center text-gray-600 text-sm bg-gray-50 rounded-xl p-3">
+                  <span className="mr-3 text-lg">📍</span>
+                  <span className="font-semibold">{device.room}</span>
                 </div>
 
-                {device.type === 'ac' && device.temperature && (
-                  <div className="flex items-center text-gray-600 text-sm">
-                    <span className="mr-2">🌡️</span>
-                    <span>{device.temperature}°C</span>
-                    <div className="ml-auto">
-                      <div className="w-16 h-2 bg-gray-200 rounded-full overflow-hidden">
-                        <div 
-                          className="h-full bg-gradient-to-r from-blue-400 to-blue-600"
-                          style={{ width: `${(device.temperature / 30) * 100}%` }}
-                        ></div>
+                {device.type === 'light' && device.brightness !== undefined && (
+                  <div className="space-y-4 bg-gradient-to-r from-yellow-50 to-orange-50 rounded-xl p-4 border border-yellow-200">
+                    <div className="flex items-center text-gray-700 text-sm">
+                      <span className="mr-3 text-lg">💡</span>
+                      <span className="font-semibold">Brightness: {device.brightness}%</span>
+                      <div className="ml-auto">
+                        <div className="w-20 h-3 bg-gray-200 rounded-full overflow-hidden shadow-inner">
+                          <div 
+                            className={`h-full rounded-full transition-all duration-500 ${
+                              device.brightness > 60 ? 'bg-gradient-to-r from-yellow-400 to-yellow-500 shadow-lg shadow-yellow-400/30' :
+                              device.brightness > 30 ? 'bg-gradient-to-r from-yellow-300 to-yellow-400' :
+                              'bg-gradient-to-r from-gray-300 to-gray-400'
+                            }`}
+                            style={{ width: `${device.brightness}%` }}
+                          ></div>
+                        </div>
+                      </div>
+                    </div>
+                    <div className="flex flex-col space-y-3">
+                      <input
+                        type="range"
+                        min="0"
+                        max="100"
+                        value={device.brightness}
+                        onChange={(e) => adjustBrightness(device.id, parseInt(e.target.value))}
+                        className="w-full h-3 bg-gray-200 rounded-lg appearance-none cursor-pointer slider-enhanced"
+                        style={{
+                          background: `linear-gradient(to right, #fbbf24 0%, #fbbf24 ${device.brightness}%, #e5e7eb ${device.brightness}%, #e5e7eb 100%)`
+                        }}
+                      />
+                      <div className="flex justify-between text-xs text-gray-500 font-medium">
+                        <span className="bg-gray-100 px-2 py-1 rounded">Off</span>
+                        <span className="bg-yellow-100 px-2 py-1 rounded">Dim</span>
+                        <span className="bg-yellow-200 px-2 py-1 rounded">Bright</span>
                       </div>
                     </div>
                   </div>
                 )}
 
-                {device.type === 'fan' && device.speed && device.status === 'on' && (
-                  <div className="flex items-center text-gray-600 text-sm">
-                    <span className="mr-2">⚡</span>
-                    <span>Speed: {device.speed}</span>
-                    <div className="ml-auto flex space-x-1">
-                      {[1, 2, 3].map((level) => (
-                        <div
-                          key={level}
-                          className={`w-2 h-4 rounded-sm ${
-                            level <= device.speed ? 'bg-green-400' : 'bg-gray-200'
-                          }`}
-                        ></div>
-                      ))}
+                {device.type === 'fan' && device.speed !== undefined && (
+                  <div className="p-4 bg-gradient-to-r from-green-50 to-teal-50 rounded-xl border border-green-100 space-y-4 shadow-sm hover:shadow-md transition-all duration-300">
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center space-x-3">
+                        <div className="w-10 h-10 bg-gradient-to-r from-green-400 to-teal-400 rounded-full flex items-center justify-center text-white font-bold shadow-md">
+                          💨
+                        </div>
+                        <div>
+                          <p className="font-semibold text-gray-800">Fan Speed</p>
+                          <p className="text-sm text-gray-600">Level {device.speed} of 3</p>
+                        </div>
+                      </div>
+                      <div className="flex space-x-1">
+                        {[1, 2, 3].map((level) => (
+                          <div
+                            key={level}
+                            className={`w-3 h-6 rounded-full transition-all duration-300 ${
+                              level <= device.speed 
+                                ? 'bg-gradient-to-t from-green-400 to-teal-400 shadow-md transform scale-110' 
+                                : 'bg-gray-200 hover:bg-gray-300'
+                            }`}
+                          ></div>
+                        ))}
+                      </div>
+                    </div>
+                    <div className="space-y-3">
+                      <div className="relative">
+                        <input
+                          type="range"
+                          min="0"
+                          max="3"
+                          value={device.speed}
+                          onChange={(e) => adjustFanSpeed(device.id, parseInt(e.target.value))}
+                          className="w-full h-3 bg-gray-200 rounded-full appearance-none cursor-pointer fan-slider shadow-inner"
+                          style={{
+                            background: `linear-gradient(to right, #10b981 0%, #14b8a6 ${(device.speed / 3) * 100}%, #e5e7eb ${(device.speed / 3) * 100}%, #e5e7eb 100%)`
+                          }}
+                        />
+                        <div className="flex justify-between text-xs text-gray-500 mt-2">
+                          <span>Off</span>
+                          <span>Low</span>
+                          <span>Med</span>
+                          <span>High</span>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                )}
+
+                {device.type === 'fire-alarm' && device.batteryLevel && (
+                  <div className="p-4 bg-gradient-to-r from-orange-50 to-red-50 rounded-xl border border-orange-100 shadow-sm hover:shadow-md transition-all duration-300">
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center space-x-3">
+                        <div className="w-10 h-10 bg-gradient-to-r from-orange-400 to-red-400 rounded-full flex items-center justify-center text-white font-bold shadow-md">
+                          🔋
+                        </div>
+                        <div>
+                          <p className="font-semibold text-gray-800">Battery Level</p>
+                          <p className="text-sm text-gray-600">{device.batteryLevel}% remaining</p>
+                        </div>
+                      </div>
+                      <div className="text-right">
+                        <div className="w-20 h-3 bg-gray-200 rounded-full overflow-hidden shadow-inner">
+                          <div 
+                            className={`h-full rounded-full transition-all duration-500 ${
+                              device.batteryLevel > 50 ? 'bg-gradient-to-r from-green-400 to-green-600' :
+                              device.batteryLevel > 20 ? 'bg-gradient-to-r from-yellow-400 to-yellow-600' :
+                              'bg-gradient-to-r from-red-400 to-red-600'
+                            }`}
+                            style={{ width: `${device.batteryLevel}%` }}
+                          ></div>
+                        </div>
+                        <p className={`text-xs mt-1 font-medium ${
+                          device.batteryLevel > 50 ? 'text-green-600' :
+                          device.batteryLevel > 20 ? 'text-yellow-600' :
+                          'text-red-600'
+                        }`}>
+                          {device.batteryLevel > 50 ? 'Good' : device.batteryLevel > 20 ? 'Low' : 'Critical'}
+                        </p>
+                      </div>
                     </div>
                   </div>
                 )}
               </div>
             </div>
 
-            {/* Control Button */}
+            {/* Enhanced Control Button */}
             <button
               onClick={() => toggleDevice(device.id)}
-              className={`w-full py-3 px-4 rounded-xl font-semibold transition-all duration-200 transform active:scale-95 shadow-lg ${
-                device.status === 'on' || device.status === 'locked'
-                  ? 'bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 text-white shadow-blue-200'
-                  : 'bg-gradient-to-r from-gray-100 to-gray-200 hover:from-gray-200 hover:to-gray-300 text-gray-700 shadow-gray-200'
+              className={`w-full py-4 px-6 rounded-xl font-semibold transition-all duration-300 transform hover:scale-105 active:scale-95 shadow-lg hover:shadow-xl focus:outline-none focus:ring-4 focus:ring-opacity-50 ${
+                device.status === 'on' || device.status === 'locked' || device.status === 'normal'
+                  ? 'bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 text-white shadow-blue-200 focus:ring-blue-300'
+                  : device.status === 'alarm'
+                  ? 'bg-gradient-to-r from-red-500 to-red-600 hover:from-red-600 hover:to-red-700 text-white shadow-red-200 animate-pulse focus:ring-red-300'
+                  : 'bg-gradient-to-r from-gray-100 to-gray-200 hover:from-gray-200 hover:to-gray-300 text-gray-700 shadow-gray-200 focus:ring-gray-300'
               }`}
             >
-              <span className="flex items-center justify-center space-x-2">
-                <span>
+              <span className="flex items-center justify-center space-x-3">
+                <span className="text-lg">
                   {device.type === 'lock' 
-                    ? (device.status === 'locked' ? '🔓 Unlock' : '🔒 Lock')
-                    : (device.status === 'on' ? '⏹️ Turn Off' : '▶️ Turn On')
+                    ? (device.status === 'locked' ? '🔓' : '🔒')
+                    : device.type === 'fire-alarm'
+                    ? (device.status === 'normal' ? '🔧' : 
+                       device.status === 'testing' ? '🔋' : 
+                       device.status === 'low-battery' ? '🛡️' : '🚨')
+                    : (device.status === 'on' ? '⏹️' : '▶️')
+                  }
+                </span>
+                <span className="font-medium">
+                  {device.type === 'lock' 
+                    ? (device.status === 'locked' ? 'Unlock Door' : 'Lock Door')
+                    : device.type === 'fire-alarm'
+                    ? (device.status === 'normal' ? 'Test Alarm' : 
+                       device.status === 'testing' ? 'Check Battery' : 
+                       device.status === 'low-battery' ? 'Reset Alarm' : 'Silence Alarm')
+                    : (device.status === 'on' ? 'Turn Off' : 'Turn On')
                   }
                 </span>
               </span>

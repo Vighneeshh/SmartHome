@@ -14,7 +14,7 @@ function Dashboard() {
   // State variables for backend communication
   const [lightValue, setLightValue] = useState(0);
   const [fanValue, setFanValue] = useState(0);
-  const [serverIP, setServerIP] = useState("192.168.1.11");
+  const [serverIP, setServerIP] = useState("192.168.1.12");
   const [status, setStatus] = useState("Waiting for data...");
   const [sensorData, setSensorData] = useState({ gas: 0, ldr: 0, temp: 0 });
   const serverUrl = `http://${serverIP}:5000`;

@@ -25,6 +25,10 @@ let deviceState = {
 // ======================================
 // This route accepts POST requests to update the fan and light values.
 // The frontend (React app) will call this when a slider is moved.
+app.get("/", (req, res) => {
+  res.send("🎉 Hello! The API server is running correctly.");
+});
+
 app.post("/api/control", (req, res) => {
   const { fan, light } = req.body;
   

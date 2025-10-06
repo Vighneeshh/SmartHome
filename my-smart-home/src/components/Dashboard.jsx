@@ -1,4 +1,6 @@
 import React, { useState, useEffect } from 'react';
+import EnergyOptimizer from './EnergyOptimizer';
+import EnergyAnalytics from './EnergyAnalytics';
 
 function Dashboard() {
   const [devices, setDevices] = useState([
@@ -43,7 +45,7 @@ function Dashboard() {
       });
   };
 
-  const fetchState = () => {
+  const fetchState = React.useCallback(() => {
     fetch(`${serverUrl}/api/state`)
       .then(response => {
         if (!response.ok) {
@@ -82,12 +84,18 @@ function Dashboard() {
         console.error('Error fetching state:', error);
         setStatus("Failed to fetch data. Check server IP and connection.");
       });
-  };
+  }, [serverUrl]);
 
   useEffect(() => {
     const interval = setInterval(fetchState, 3000);
     return () => clearInterval(interval);
-  }, [serverIP]);
+  }, [serverIP, fetchState]);
+
+  // Function to apply AI suggestions to ESP32
+  const applyAISuggestions = (lightValue, fanValue) => {
+    sendControl('light', lightValue);
+    sendControl('fan', fanValue);
+  };
 
   const toggleDevice = (id) => {
     const device = devices.find(d => d.id === id);
@@ -259,6 +267,19 @@ function Dashboard() {
           </div>
           <p className="mt-2 text-sm text-gray-300">{status}</p>
         </div>
+
+        {/* AI Energy Optimizer Section */}
+        <EnergyOptimizer 
+          devices={devices}
+          sensorData={sensorData}
+          onApplySuggestions={applyAISuggestions}
+          serverIP={serverIP}
+        />
+
+        {/* Energy Analytics Dashboard */}
+        <EnergyAnalytics 
+          serverIP={serverIP}
+        />
 
         {/* Enhanced Device Cards Grid */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8 mb-20">

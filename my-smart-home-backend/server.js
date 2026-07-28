@@ -36,9 +36,13 @@ app.use(
       "http://localhost:5173",
       "http://localhost:5174",
       "http://127.0.0.1:5173",
+      "http://192.168.29.12:5173",
+      "http://192.168.29.12:5174",
+      "http://10.53.84.194:5173",
+      "http://10.53.84.194:5174",
     ],
     credentials: true,
-  })
+  }),
 );
 app.use(bodyParser.json());
 
@@ -85,7 +89,7 @@ const calculateEnergyConsumption = (lightValue, fanValue) => {
 const trackEnergyUsage = () => {
   const currentConsumption = calculateEnergyConsumption(
     deviceState.light,
-    deviceState.fan
+    deviceState.fan,
   );
   const hour = new Date().getHours();
 
@@ -121,7 +125,7 @@ async function getAIOptimizationSuggestions() {
     const currentLightLevel = deviceState.sensors.ldr;
     const currentConsumption = calculateEnergyConsumption(
       deviceState.light,
-      deviceState.fan
+      deviceState.fan,
     );
 
     // Get recent usage patterns
@@ -141,14 +145,14 @@ async function getAIOptimizationSuggestions() {
 Current Status:
 - Time: ${currentHour}:00 (24-hour format)
 - Current LED brightness: ${deviceState.light}/255 (${Math.round(
-      (deviceState.light / 255) * 100
+      (deviceState.light / 255) * 100,
     )}%)
 - Current fan speed: ${deviceState.fan}/255 (${Math.round(
-      (deviceState.fan / 255) * 5
+      (deviceState.fan / 255) * 5,
     )} of 5 levels)
 - Room temperature: ${currentTemp}°C
 - Light sensor reading: ${currentLightLevel}/1024 (${Math.round(
-      (currentLightLevel / 1024) * 100
+      (currentLightLevel / 1024) * 100,
     )}% brightness)
 - Current power consumption: ${currentConsumption.toFixed(2)}W
 
@@ -232,7 +236,7 @@ Values: ledBrightness (0-255), fanSpeed (0-255), expectedSavings (0-100%), comfo
       ledBrightness = Math.floor(deviceState.light * naturalLightFactor);
       expectedSavings = 20;
       explanation = `Daytime optimization: Reduced LED brightness by ${Math.round(
-        (1 - naturalLightFactor) * 100
+        (1 - naturalLightFactor) * 100,
       )}% using natural light`;
     } else {
       // Evening: balanced settings
@@ -270,11 +274,11 @@ async function getChatbotResponse(userMessage, context = {}) {
     const lightPercent = Math.round((deviceState.light / 255) * 100);
     const fanPercent = Math.round((deviceState.fan / 255) * 100);
     const lightLevelPercent = Math.round(
-      (deviceState.sensors.ldr / 1024) * 100
+      (deviceState.sensors.ldr / 1024) * 100,
     );
     const currentPower = calculateEnergyConsumption(
       deviceState.light,
-      deviceState.fan
+      deviceState.fan,
     ).toFixed(2);
 
     const systemContext = `You are an intelligent smart home assistant. You can help users with:
@@ -334,9 +338,9 @@ Respond helpfully and conversationally. Keep responses under 100 words unless mo
       message.includes("bill")
     ) {
       return `Based on your current setup (LED: ${Math.round(
-        (deviceState.light / 255) * 100
+        (deviceState.light / 255) * 100,
       )}%, Fan: ${Math.round(
-        (deviceState.fan / 255) * 100
+        (deviceState.fan / 255) * 100,
       )}%), here are some energy tips:
       
 • Reduce LED brightness by 20% during daytime
@@ -344,7 +348,7 @@ Respond helpfully and conversationally. Keep responses under 100 words unless mo
 • Turn off lights when not needed
 • Current power usage: ${calculateEnergyConsumption(
         deviceState.light,
-        deviceState.fan
+        deviceState.fan,
       ).toFixed(1)}W
 
 Would you like specific optimization suggestions?`;
@@ -364,7 +368,7 @@ Would you like specific optimization suggestions?`;
 • Ideal range: 22-26°C
       
 Your current fan is at ${Math.round(
-        (deviceState.fan / 255) * 100
+        (deviceState.fan / 255) * 100,
       )}%. Would you like me to suggest adjustments?`;
     }
 
@@ -374,9 +378,9 @@ Your current fan is at ${Math.round(
       message.includes("dark")
     ) {
       return `Current lighting: LED at ${Math.round(
-        (deviceState.light / 255) * 100
+        (deviceState.light / 255) * 100,
       )}%, natural light at ${Math.round(
-        (deviceState.sensors.ldr / 1024) * 100
+        (deviceState.sensors.ldr / 1024) * 100,
       )}%.
       
 Suggestions:
@@ -395,7 +399,7 @@ Current status:
 • Temperature: ${deviceState.sensors.temp}°C
 • Power: ${calculateEnergyConsumption(
       deviceState.light,
-      deviceState.fan
+      deviceState.fan,
     ).toFixed(1)}W
 
 Try asking about energy savings, device control, or optimization tips!`;
@@ -460,11 +464,11 @@ app.get("/api/state", (req, res) => {
 app.get("/api/energy", (req, res) => {
   const currentConsumption = calculateEnergyConsumption(
     deviceState.light,
-    deviceState.fan
+    deviceState.fan,
   );
   const dailyTotal = energyData.hourlyUsage.reduce(
     (sum, usage) => sum + usage,
-    0
+    0,
   );
 
   res.json({
@@ -503,7 +507,7 @@ app.post("/api/apply-ai-optimization", (req, res) => {
 
   const beforeConsumption = calculateEnergyConsumption(
     deviceState.light,
-    deviceState.fan
+    deviceState.fan,
   );
 
   // Apply the optimization
@@ -516,7 +520,7 @@ app.post("/api/apply-ai-optimization", (req, res) => {
 
   const afterConsumption = calculateEnergyConsumption(
     deviceState.light,
-    deviceState.fan
+    deviceState.fan,
   );
   const actualSavings = beforeConsumption - afterConsumption;
 
@@ -529,9 +533,8 @@ app.post("/api/apply-ai-optimization", (req, res) => {
 
   // Mark the suggestion as applied
   if (energyData.aiSuggestions.length > 0) {
-    energyData.aiSuggestions[
-      energyData.aiSuggestions.length - 1
-    ].applied = true;
+    energyData.aiSuggestions[energyData.aiSuggestions.length - 1].applied =
+      true;
   }
 
   console.log(
@@ -540,7 +543,7 @@ app.post("/api/apply-ai-optimization", (req, res) => {
     "Fan:",
     fanSpeed,
     "Savings:",
-    actualSavings.toFixed(2) + "W"
+    actualSavings.toFixed(2) + "W",
   );
 
   res.json({
@@ -606,7 +609,7 @@ app.post("/api/optimize", (req, res) => {
 
   const beforeConsumption = calculateEnergyConsumption(
     deviceState.light,
-    deviceState.fan
+    deviceState.fan,
   );
 
   // Apply the optimization
@@ -619,7 +622,7 @@ app.post("/api/optimize", (req, res) => {
 
   const afterConsumption = calculateEnergyConsumption(
     deviceState.light,
-    deviceState.fan
+    deviceState.fan,
   );
   const actualSavings = beforeConsumption - afterConsumption;
 
@@ -632,8 +635,8 @@ app.post("/api/optimize", (req, res) => {
 
   console.log(
     `AI Optimization applied: Light: ${lightValue}, Fan: ${fanValue}, Savings: ${actualSavings.toFixed(
-      2
-    )}W`
+      2,
+    )}W`,
   );
 
   res.json({
@@ -651,22 +654,22 @@ app.get("/api/analytics", (req, res) => {
 
   // Calculate peak usage hours
   const peakHour = energyData.hourlyUsage.indexOf(
-    Math.max(...energyData.hourlyUsage)
+    Math.max(...energyData.hourlyUsage),
   );
   const lowHour = energyData.hourlyUsage.indexOf(
-    Math.min(...energyData.hourlyUsage.filter((h) => h > 0))
+    Math.min(...energyData.hourlyUsage.filter((h) => h > 0)),
   );
 
   // Calculate efficiency score based on usage patterns
   const totalUsage = energyData.hourlyUsage.reduce(
     (sum, usage) => sum + usage,
-    0
+    0,
   );
   const averageUsage = totalUsage / 24;
   const currentUsage = energyData.hourlyUsage[hour];
   const efficiencyScore = Math.max(
     0,
-    Math.min(100, 100 - (currentUsage / averageUsage - 1) * 50)
+    Math.min(100, 100 - (currentUsage / averageUsage - 1) * 50),
   );
 
   res.json({
@@ -678,7 +681,7 @@ app.get("/api/analytics", (req, res) => {
     totalSavings: Number(energyData.totalSavings) || 0,
     optimizationCount: energyData.aiSuggestions.filter((s) => s.applied).length,
     aiSuggestionsToday: energyData.aiSuggestions.filter(
-      (s) => new Date(s.timestamp).toDateString() === new Date().toDateString()
+      (s) => new Date(s.timestamp).toDateString() === new Date().toDateString(),
     ).length,
   });
 });
@@ -692,7 +695,7 @@ app.get("/api/test-ai", async (req, res) => {
 
     console.log("🧪 Testing Gemini AI...");
     const result = await model.generateContent(
-      "Respond with just the word 'WORKING' if you can see this message."
+      "Respond with just the word 'WORKING' if you can see this message.",
     );
     const response = await result.response;
     const text = response.text();
@@ -716,6 +719,6 @@ app.listen(PORT, () => {
   console.log("🤖 AI Features: Energy Optimization & Chatbot Enabled");
   console.log(
     "🔑 Gemini API Key configured:",
-    process.env.GEMINI_API_KEY ? "Yes" : "No"
+    process.env.GEMINI_API_KEY ? "Yes" : "No",
   );
 });

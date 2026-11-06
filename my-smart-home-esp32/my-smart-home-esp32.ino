@@ -5,14 +5,14 @@
 // ======================================
 // 1. WiFi Configuration
 // ======================================
-const char* ssid = "Airtel_Prakasham airtell"; //change
-const char* password = "8871588000"; //Change
+const char* ssid = "YOUR_WIFI_SSID";         //change
+const char* password = "YOUR_WIFI_PASSWORD"; //Change
 
 // ======================================
 // 2. Server Configuration
 // ======================================
 
-const char* serverUrl = "http://192.168.1.12:5000"; //to_be_updated
+const char* serverUrl = "http://YOUR_SERVER_LAN_IP:5000"; //to_be_updated
 
 // ======================================
 // 3. Pin Definitions
